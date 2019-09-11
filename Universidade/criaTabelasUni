@@ -1,0 +1,54 @@
+CREATE TABLE Alunos (
+	`id_aluno`	char ( 10 ) UNIQUE,
+	`nome`	char ( 50 ),
+	`login`	char ( 50 ),
+	`idade`	int,
+	`media`	real,
+	PRIMARY KEY(`id_aluno`)
+);
+
+CREATE TABLE Aula (
+	`id_curso`	char ( 10 ) UNIQUE,
+	`num_sala`	int NOT NULL UNIQUE,
+	PRIMARY KEY(`id_curso`,`num_sala`),
+	FOREIGN KEY(`id_curso`) REFERENCES `Cursos`(`id_curso`),
+	FOREIGN KEY(`num_sala`) REFERENCES `Salas`(`num_sala`)
+);
+
+CREATE TABLE Cursos (
+	`id_curso`	char ( 10 ) UNIQUE,
+	`nomec`	char ( 50 ),
+	`creditos`	int,
+	PRIMARY KEY(`id_curso`)
+);
+
+CREATE TABLE Matriculado (
+	`id_aluno`	char ( 10 ) UNIQUE,
+	`id_curso`	char ( 10 ) UNIQUE,
+	`nota`	char ( 5 ),
+	PRIMARY KEY(`id_aluno`,`id_curso`),
+	FOREIGN KEY(`id_curso`) REFERENCES `Cursos`(`id_curso`),
+	FOREIGN KEY(`id_aluno`) REFERENCES `Alunos`(`id_aluno`)
+);
+
+CREATE TABLE Ministra (
+	`id_prof`	char ( 10 ) UNIQUE,
+	`id_curso`	char ( 10 ) UNIQUE,
+	PRIMARY KEY(`id_prof`,`id_curso`),
+	FOREIGN KEY(`id_prof`) REFERENCES `Professores`(`id_prof`),
+	FOREIGN KEY(`id_curso`) REFERENCES `Cursos`(`id_curso`)
+);
+
+CREATE TABLE Professores (
+	`id_prof`	char ( 10 ) UNIQUE,
+	`nomep`	char ( 10 ),
+	`sal`	real,
+	PRIMARY KEY(`id_prof`)
+);
+
+CREATE TABLE Salas (
+	`num_sala`	int UNIQUE,
+	`capacidade`	int,
+	`endereco`	char ( 100 ),
+	PRIMARY KEY(`num_sala`)
+);
