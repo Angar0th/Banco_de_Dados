@@ -14,7 +14,7 @@ UPDATE barcos SET categoria = 'A' WHERE id_barco = 101;
 UPDATE barcos SET categoria = 'B' WHERE id_barco = 102;
 UPDATE barcos SET categoria = 'C' WHERE id_barco = 103 OR id_barco = 104;
 
-/*inseri marinheiros para testar o gatilho MonitoraBarcos*/
+/*insere marinheiros para testar o gatilho MonitoraBarcos*/
 insert into Marinheiros
 (id_marin, nome_marin, avaliacao, idade) values
 (1, 'Elvis', 10, 24),
@@ -77,13 +77,17 @@ CREATE TRIGGER barcoDevolvido BEFORE INSERT ON RESERVAS
     END $$
 DELIMITER ;
 
+/*atualiza a tabela barcos para testar a trigger */
 update barcos set disponivel = 0;
 
+/* deleta dois marinheiros com avalicao 10 para testar a trigger */
 delete from reservas where id_marin = 1;
 delete from reservas where id_marin = 58;
 
+/*testa a trigger*/
 insert into reservas (id_marin, id_barco, dia, devolucao)
-values (1,104, '1998-10-10', '2019-10-31');
+values (1,104, '2019-10-10', '2019-10-31');
+/*esse deve retornar erro pois o barco esta reservado*/
 insert into reservas (id_marin, id_barco, dia, devolucao)
 values (58,104, '1998-10-10', '2019-10-31');
 
