@@ -12,7 +12,6 @@ create table Condutor(
     CHECK(CHAR_LENGTH(cpf_motorista) = 11),
     CHECK(CHAR_LENGTH(telefone_cond) = 9)
 );
-SELECT 'Criou Condutor' as '';
 
 drop table if exists veiculo;
 create table veiculo(
@@ -25,22 +24,19 @@ create table veiculo(
     CHECK(CHAR_LENGTH(renavam) = 9),
     CHECK(ano >= 1900)
 );
-SELECT 'Criou veiculo' as '';
 
 drop table if exists motorista;
 create table motorista(
     data_inicio_mot timestamp not null,
-    data_fim_mot timestamp not null, 
-    renavam varchar(9),
+    data_fim_mot timestamp, 
+    renavam varchar(9) not null,
     cpf_motorista varchar(11) not null,
     id_motorista  int PRIMARY KEY auto_increment,
     CONSTRAINT DIRIGE FOREIGN KEY (cpf_motorista) REFERENCES Condutor(cpf_motorista) on update cascade,
     CONSTRAINT ALUGADO FOREIGN KEY (renavam) REFERENCES veiculo(renavam) on update cascade,
     UNIQUE(renavam, cpf_motorista, data_inicio_mot, data_fim_mot),
     check(timediff(data_fim_mot,data_inicio_mot) >= 0)
-    
 );
-SELECT 'Criou motorista' as '';
 
 drop table if exists passageiros;
 create table passageiros(
@@ -49,9 +45,7 @@ create table passageiros(
     data_cadastro_pass timestamp not null,
     cpf_passageiro varchar(11) PRIMARY KEY,
     CHECK(CHAR_LENGTH(telefone_pass) = 9)
-    
 );
-SELECT 'Criou passageiros' as '';
 
 drop table if exists corrida;
 create table corrida(
@@ -59,7 +53,7 @@ create table corrida(
     avaliacao_condutor INT UNSIGNED,
     avaliacao_veiculo INT UNSIGNED,
     data_inicio_corr TIMESTAMP not null,
-    data_fim_corr TIMESTAMP not null,
+    data_fim_corr TIMESTAMP,
     origem varchar(255),
     destino varchar(255),
     tarifa real,
@@ -71,10 +65,132 @@ create table corrida(
     CONSTRAINT SOLICITA FOREIGN KEY (cpf_passageiro) REFERENCES passageiros(cpf_passageiro) on update cascade,
     CHECK( avaliacao_condutor <= 5),
     CHECK( avaliacao_veiculo <= 5),
-    check(timediff(data_fim_corr,data_inicio_corr) >= 0)
-    
+    CHECK(timediff(data_fim_corr,data_inicio_corr) >= 0)    
 );
-SELECT 'Criou corrida' as '';
+
+/*------------TRIGGERS CHECK INSERTS-------------*/
+/*Verifica se a data de cadastro do passageiro é > now()*/
+drop trigger if exists chkDataCadPass;
+DELIMITER $$
+CREATE TRIGGER chkDataCadPass BEFORE INSERT ON passageiros
+    FOR EACH ROW BEGIN 
+        IF (new.data_cadastro_pass > now()) THEN
+            signal sqlstate '45000' set MESSAGE_TEXT = 'Ora ora, temos um passageiro viajante do tempo aqui?!(data de cadastro errada!)';
+        END IF; 
+    END $$
+DELIMITER ;
+
+/*Verifica se a data de cadastro do condutor é > now()*/
+drop trigger if exists chkDataCadCond;
+DELIMITER $$
+CREATE TRIGGER chkDataCadCond BEFORE INSERT ON condutor
+    FOR EACH ROW BEGIN 
+        IF (new.data_cadastro_cond > now()) THEN
+            signal sqlstate '45000' set MESSAGE_TEXT = 'Ora ora, temos um condutor viajante do tempo aqui?! (data de cadastro errada!)';
+        END IF; 
+    END $$
+DELIMITER ;
+
+/*Verifica se as data da corrida é > now*/
+drop trigger if exists chkInsDataCorrida;
+DELIMITER $$
+CREATE TRIGGER chkInsDataCorrida BEFORE INSERT ON corrida
+    FOR EACH ROW BEGIN 
+        IF (new.data_fim_corr > now()) THEN
+            signal sqlstate '45000' set MESSAGE_TEXT = 'Voce e vidente? (data de fim da corrida no futuro)';
+        END IF; 
+        IF (new.data_inicio_corr > now()) THEN
+            signal sqlstate '45000' set MESSAGE_TEXT = 'Voce e vidente? (data de inicio da corrida no futuro)';
+        END IF; 
+    END $$
+DELIMITER ;
+
+/*Não permite que um veiculo seja retirado por mais de um condutor ao mesmo tempo*/
+/*Não permite que um condutor retire mais de um carro ao mesmo tempo*/
+drop trigger if exists chkInsMotorista;
+DELIMITER $$
+CREATE TRIGGER chkInsMotorista BEFORE INSERT ON motorista
+    FOR EACH ROW BEGIN 
+        IF ((SELECT id_motorista from motorista where renavam = new.renavam AND data_fim_mot is null) is not null) THEN
+            signal sqlstate '45000' set MESSAGE_TEXT = 'Este carro ja esta com outro motorista!';
+        END IF; 
+        IF((SELECT id_motorista from motorista where cpf_motorista = new.cpf_motorista AND data_fim_mot is null) is not null) THEN
+            signal sqlstate '45000' set MESSAGE_TEXT = 'Voce nao pode estar em dois carros ao mesmo tempo!';
+        END IF;
+    END $$
+DELIMITER ;
+
+/*Verifica se o passageiro e condutor já estão numa corrida*/
+drop trigger if exists chkNewCorrida;
+DELIMITER $$
+CREATE TRIGGER chkNewCorrida BEFORE INSERT ON corrida
+    FOR EACH ROW BEGIN 
+        /*checa um campo que nunca vai ser nulo caso ache retorne um item nas condicoes abaixo*/
+        IF ((SELECT id_corrida from corrida where cpf_passageiro = new.cpf_passageiro AND data_fim_corr is null) is not null) THEN
+            signal sqlstate '45000' set MESSAGE_TEXT = 'Ta viajando cara?! (Passageiro tentando realizar uma corrida antes de terminar a atual)';
+        END IF; 
+        IF ((SELECT id_corrida from corrida where id_motorista = new.id_motorista AND data_fim_corr is null) is not null) THEN
+            signal sqlstate '45000' set MESSAGE_TEXT = 'Nao tente ser tao eficiente! (Condutor tentando realizar uma corrida antes de terminar a atual)';
+        END IF;
+    END $$
+DELIMITER ;
+
+/*------------TRIGGERS CHECK UPDATES-------------*/
+/*Verifica se a data de cadastro do passageiro é > now()*/
+drop trigger if exists chkUpdDataCadPass;
+DELIMITER $$
+CREATE TRIGGER chkUpdDataCadPass BEFORE UPDATE ON passageiros
+    FOR EACH ROW BEGIN 
+        IF (new.data_cadastro_pass > now()) THEN
+            signal sqlstate '45000' set MESSAGE_TEXT = 'Alguem esta querendo mudar o passado? (data de cadastro passageiro errada!)';
+        END IF; 
+    END $$
+DELIMITER ;
+
+/*Verifica se a data de cadastro do condutor é > now()*/
+drop trigger if exists chkUpdDataCadCond;
+DELIMITER $$
+CREATE TRIGGER chkUpdDataCadCond BEFORE UPDATE ON condutor
+    FOR EACH ROW BEGIN 
+        IF (new.data_cadastro_cond > now()) THEN
+            signal sqlstate '45000' set MESSAGE_TEXT = 'Alguem esta querendo mudar o passado? (data de cadastro condutor errada!)';
+        END IF; 
+    END $$
+DELIMITER ;
+
+/*Verifica se as datas de motorista é > now*/
+drop trigger if exists chkUpdDataMotorista;
+DELIMITER $$
+CREATE TRIGGER chkUpdDataMotorista BEFORE UPDATE ON motorista
+    FOR EACH ROW BEGIN 
+        IF (new.data_fim_mot > now()) THEN
+            signal sqlstate '45000' set MESSAGE_TEXT = 'Voce e vidente? (data de fim do motorista no futuro)';
+        END IF; 
+        IF (new.data_inicio_mot > now()) THEN
+            signal sqlstate '45000' set MESSAGE_TEXT = 'Voce e vidente? (data de inicio do motorista no futuro)';
+        END IF; 
+        IF (new.data_fim_mot is null and old.data_fim_mot is not null) THEN
+            signal sqlstate '45000' set MESSAGE_TEXT = 'Hmmmmm alguem esta querendo burlar as regras do jogo? (nao e permitido alterar dados do historico para null)';
+        END IF;
+    END $$
+DELIMITER ;
+
+/*Verifica se a data de fim da corrida não > now*/
+drop trigger if exists chkUpdDataIniCorrida;
+DELIMITER $$
+CREATE TRIGGER chkUpdDataCorrida BEFORE UPDATE ON corrida
+    FOR EACH ROW BEGIN 
+        IF (new.data_inicio_corr > now()) THEN
+            signal sqlstate '45000' set MESSAGE_TEXT = 'Voce e vidente? (data de inicio da corrida no futuro)';
+        END IF; 
+        IF (new.data_fim_corr > now()) THEN
+            signal sqlstate '45000' set MESSAGE_TEXT = 'Voce e vidente? (data de fim da corrida no futuro)';
+        END IF;
+        IF (new.data_fim_corr is null and old.data_fim_corr is not null) THEN
+            signal sqlstate '45000' set MESSAGE_TEXT = 'Hmmmmm alguem esta querendo burlar as regras do jogo? (nao e permitido alterar dados do histórico para null)';
+        END IF;
+    END $$
+DELIMITER ;
 
 /*------------VIEWS-------------*/
 drop view if exists ResumoCorrida;
@@ -118,7 +234,7 @@ create view ResumoCondutor
      qtd_aval, 
      media_aval, 
      qtd_corrida, 
-     salario) as
+     valor_receber) as
 
     select cpf_motorista, 
     Nome_Motorista, 
@@ -155,15 +271,4 @@ create view ResumoVeiculo
     natural join veiculo
     group by renavam;
 
-/*------------TRIGGERS-------------*/
 source C:\Users\Elvis\Desktop\Banco_de_Dados\GB_Parte1\inserts.sql
-
-/*CHECK(data_cadastro_cond <= now()) fazer numa trigger */
-
-/*CHECK(data_inicio <= now()),
-    CHECK(data_fim <= now()) trigger*/
-
-/*CHECK(data_cadastro_pass <= now()) trigger*/
-
-/*CHECK( data_inicio <= now()),
-    CHECK( data_fim <= now()) trigger*/
