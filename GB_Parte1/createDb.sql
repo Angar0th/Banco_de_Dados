@@ -175,7 +175,7 @@ CREATE TRIGGER chkUpdDataMotorista BEFORE UPDATE ON motorista
     END $$
 DELIMITER ;
 
-/*Verifica se a data de fim da corrida não > now*/
+/*Verifica se a data de fim da corrida é > now*/
 drop trigger if exists chkUpdDataIniCorrida;
 DELIMITER $$
 CREATE TRIGGER chkUpdDataCorrida BEFORE UPDATE ON corrida
@@ -187,7 +187,22 @@ CREATE TRIGGER chkUpdDataCorrida BEFORE UPDATE ON corrida
             signal sqlstate '45000' set MESSAGE_TEXT = 'Voce e vidente? (data de fim da corrida no futuro)';
         END IF;
         IF (new.data_fim_corr is null and old.data_fim_corr is not null) THEN
-            signal sqlstate '45000' set MESSAGE_TEXT = 'Hmmmmm alguem esta querendo burlar as regras do jogo? (nao e permitido alterar dados do histórico para null)';
+            signal sqlstate '45000' set MESSAGE_TEXT = 'Hmmmmm alguem esta querendo burlar as regras do jogo? (nao e permitido alterar dados do historico para null)';
+        END IF;
+    END $$
+DELIMITER ;
+
+/*Verifica se o passageiro e condutor já estão numa corrida*/
+drop trigger if exists chkUpdFinalCorrida;
+DELIMITER $$
+CREATE TRIGGER chkUpdFinalCorrida BEFORE UPDATE ON corrida
+    FOR EACH ROW BEGIN 
+        /*checa um campo que nunca vai ser nulo caso ache retorne um item nas condicoes abaixo*/
+        IF ((SELECT id_corrida from corrida where cpf_passageiro = new.cpf_passageiro AND data_fim_corr is null) is not null) THEN
+            signal sqlstate '45000' set MESSAGE_TEXT = 'Ta viajando cara?! (Passageiro tentando realizar uma corrida antes de terminar a atual)';
+        END IF; 
+        IF ((SELECT id_corrida from corrida where id_motorista = new.id_motorista AND data_fim_corr is null) is not null) THEN
+            signal sqlstate '45000' set MESSAGE_TEXT = 'Nao tente ser tao eficiente! (Condutor tentando realizar uma corrida antes de terminar a atual)';
         END IF;
     END $$
 DELIMITER ;
@@ -270,5 +285,3 @@ create view ResumoVeiculo
     natural join motorista
     natural join veiculo
     group by renavam;
-
-source C:\Users\Elvis\Desktop\Banco_de_Dados\GB_Parte1\inserts.sql
