@@ -28,7 +28,7 @@ create table veiculo(
 drop table if exists motorista;
 create table motorista(
     data_inicio_mot timestamp not null,
-    data_fim_mot timestamp, 
+    data_fim_mot timestamp null default null, 
     renavam varchar(9) not null,
     cpf_motorista varchar(11) not null,
     id_motorista  int PRIMARY KEY auto_increment,
@@ -53,7 +53,7 @@ create table corrida(
     avaliacao_condutor INT UNSIGNED,
     avaliacao_veiculo INT UNSIGNED,
     data_inicio_corr TIMESTAMP not null,
-    data_fim_corr TIMESTAMP,
+    data_fim_corr TIMESTAMP null default null,
     origem varchar(255),
     destino varchar(255),
     tarifa real,
