@@ -3,8 +3,8 @@ CREATE DATABASE MeLeva;
 USE MeLeva;
 
 /*------------TABLES-------------*/
-drop table if exists Condutor;
-create table Condutor(
+drop table if exists condutor;
+create table condutor(
     cpf_motorista varchar(11) primary key,
     nome_cond varchar(255) not null,
     telefone_cond varchar(9) not null UNIQUE,
@@ -32,10 +32,9 @@ create table motorista(
     renavam varchar(9) not null,
     cpf_motorista varchar(11) not null,
     id_motorista  int PRIMARY KEY auto_increment,
-    CONSTRAINT DIRIGE FOREIGN KEY (cpf_motorista) REFERENCES Condutor(cpf_motorista) on update cascade,
+    CONSTRAINT DIRIGE FOREIGN KEY (cpf_motorista) REFERENCES condutor(cpf_motorista) on update cascade,
     CONSTRAINT ALUGADO FOREIGN KEY (renavam) REFERENCES veiculo(renavam) on update cascade,
-    UNIQUE(renavam, cpf_motorista, data_inicio_mot, data_fim_mot),
-    check(timediff(data_fim_mot,data_inicio_mot) >= 0)
+    UNIQUE(renavam, cpf_motorista, data_inicio_mot, data_fim_mot)
 );
 
 drop table if exists passageiros;
@@ -64,8 +63,7 @@ create table corrida(
     CONSTRAINT ACEITA FOREIGN KEY (id_motorista) REFERENCES motorista(id_motorista) on update cascade,
     CONSTRAINT SOLICITA FOREIGN KEY (cpf_passageiro) REFERENCES passageiros(cpf_passageiro) on update cascade,
     CHECK( avaliacao_condutor <= 5),
-    CHECK( avaliacao_veiculo <= 5),
-    CHECK(timediff(data_fim_corr,data_inicio_corr) >= 0)    
+    CHECK( avaliacao_veiculo <= 5)
 );
 
 /*------------TRIGGERS CHECK INSERTS-------------*/
@@ -175,6 +173,29 @@ CREATE TRIGGER chkUpdDataMotorista BEFORE UPDATE ON motorista
     END $$
 DELIMITER ;
 
+/*Verifica se data de termino é maior que inicial no update */
+drop trigger if exists chkUpdDiffMotorista;
+DELIMITER $$
+CREATE TRIGGER chkUpdDiffMotorista BEFORE UPDATE ON motorista
+    FOR EACH ROW BEGIN 
+        IF (new.data_fim_mot < new.data_inicio_mot) THEN
+            signal sqlstate '45000' set MESSAGE_TEXT = 'Ta errado isso ai? (data de fim do motorista menor que inicial)';
+        END IF; 
+    END $$
+DELIMITER ;
+
+/*Verifica se data de termino é maior que inicial no insert */
+drop trigger if exists chkDiffMotorista;
+DELIMITER $$
+CREATE TRIGGER chkDiffMotorista BEFORE INSERT ON motorista
+    FOR EACH ROW BEGIN 
+        IF (new.data_fim_mot < new.data_inicio_mot) THEN
+            signal sqlstate '45000' set MESSAGE_TEXT = 'Ta errado isso ai? (data de fim do motorista menor que inicial)';
+        END IF; 
+    END $$
+DELIMITER ;
+
+
 /*Verifica se a data de fim da corrida é > now*/
 drop trigger if exists chkUpdDataIniCorrida;
 DELIMITER $$
@@ -196,8 +217,7 @@ DELIMITER ;
 drop trigger if exists chkUpdFinalCorrida;
 DELIMITER $$
 CREATE TRIGGER chkUpdFinalCorrida BEFORE UPDATE ON corrida
-    FOR EACH ROW BEGIN 
-        /*checa um campo que nunca vai ser nulo caso ache retorne um item nas condicoes abaixo*/
+    FOR EACH ROW BEGIN /*checa um campo que nunca vai ser nulo caso ache retorne um item nas condicoes abaixo*/        
         IF ((SELECT id_corrida from corrida where cpf_passageiro = new.cpf_passageiro AND data_fim_corr is null) is not null) THEN
             signal sqlstate '45000' set MESSAGE_TEXT = 'Ta viajando cara?! (Passageiro tentando realizar uma corrida antes de terminar a atual)';
         END IF; 
@@ -237,9 +257,9 @@ create view ResumoCorrida (
     renavam as id_veiculo,
     avaliacao_veiculo, 
     avaliacao_condutor
-    from Corrida
+    from corrida
     natural join motorista
-    natural join Condutor
+    natural join condutor
     natural join passageiros;  
 
 drop view if exists ResumoCondutor;

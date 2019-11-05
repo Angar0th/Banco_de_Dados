@@ -1,5 +1,5 @@
 /*INSERTS validos para condutor*/
-insert into Condutor
+insert into condutor
 values ("12345678901", "Martin Scorcese", "123456789", now()),
        ("12345678902", "Falcão",          "999999991", now()),
        ("12345678903", "Jorge",           "999999992", now()),
@@ -8,7 +8,7 @@ values ("12345678901", "Martin Scorcese", "123456789", now()),
        ("12345678906", "Frank Martin",    "999999995", now()),
        ("12345678908", "Nathanne",        "999999998", now());
 /*INSERTS invalidos para condutor (teste)*/
-insert into Condutor
+insert into condutor
 values ("12345678907", "Marty McFly",   "999999996", "2020-10-11 12:30:01");/*NÃO PERMITE VIAJANTES DO TEMPO SE CADASTRAREM (data de cadastro > now())*/
 update condutor set data_cadastro_cond = DATE_ADD(now(), INTERVAL 1 SECOND) where cpf_motorista = "12345678901";/*NÃO PERMITE VIAJANTES DO TEMPO SE CADASTRAREM (data de cadastro > now())*/
 
@@ -60,9 +60,9 @@ values (now(), now(), "012345678", "12345678901"),
 insert into motorista (data_inicio_mot, data_fim_mot,renavam,cpf_motorista) values (now(), null, "012345682", "12345678908");/*NÃO PERMITE RETIRAR UM VEICULO QUE JÁ ESTÁ RETIRADO*/
 update motorista set data_fim_mot = DATE_ADD(now(), INTERVAL 1 SECOND) where id_motorista = 6;/*NÃO PERMITE DAR UPDATE COM DATAS NO FUTURO*/
 update motorista set data_inicio_mot = DATE_ADD(now(), INTERVAL 1 SECOND) where id_motorista = 6;/*NÃO PERMITE DAR UPDATE COM DATAS NO FUTURO*/
-update motorista set data_fim_mot = DATE_SUB(data_inicio_mot, INTERVAL 1 SECOND) where id_motorista = 6;/*NÃO PERMITE DAR UPDATE COM DATAS MENORES DO QUE INICIAL*/
 update motorista set data_fim_mot = null where id_motorista = 1;/*NÃO PERMITE MUDAR DATAS VALIDAS PARA NULL*/
-insert into motorista (data_inicio_mot, data_fim_mot,renavam,cpf_motorista) values (now(), null, "012345683", "12345678906")/*Não permite retirar mais de um veiculo ao mesmo tempo*/;
+update motorista set data_fim_mot = DATE_SUB(data_inicio_mot, INTERVAL 1 SECOND) where id_motorista = 6;/*NÃO PERMITE DAR UPDATE COM DATAS MENORES DO QUE INICIAL*/
+insert into motorista (data_inicio_mot, data_fim_mot,renavam,cpf_motorista) values (now(), null, "012345683", "12345678906");/*Não permite retirar mais de um veiculo ao mesmo tempo*/
 
 /*INSERTS validos para corrida*/
 insert into corrida (avaliacao_condutor
@@ -75,7 +75,7 @@ insert into corrida (avaliacao_condutor
                      ,distancia_km
                      ,id_motorista
                      ,cpf_passageiro)
-values  (5,5,      "2019-10-11 12:30:01", "2019-10-11 12:41:31", "sapiranga",       "sapiranga",          0.3, 0.5, 1, "01234567890"),
+values  (5,5,      "2019-10-11 12:30:01", "2019-10-11 12:29:31", "sapiranga",       "sapiranga",          0.3, 0.5, 1, "01234567890"),
         (1,4,      "2019-10-12 12:30:01", "2019-10-12 12:41:31", "novo hamburgo",   "novo hamburgo",      0.6, 0.7, 2, "01234567891"),
         (3,2,      "2019-10-13 12:30:01", "2019-10-13 12:41:31", "são leopoldo",    "novo hamburgo",      0.8, 0.8, 3, "01234567892"),
         (4,1,      "2019-10-14 12:30:01", "2019-10-14 12:41:31", "campo bom",       "campo bom",          0.9, 0.9, 4, "01234567893"),
@@ -113,4 +113,4 @@ values (null,null,"2019-10-20 12:30:01",  null,                 "sapiranga",    
 update corrida set data_fim_corr =  DATE_ADD(now(), INTERVAL 1 SECOND) where id_corrida = 11;/*NÃO PERMITE DAR UPDATE COM DATAS NO FUTURO*/
 update corrida set data_inicio_corr =  DATE_ADD(now(), INTERVAL 1 SECOND) where id_corrida = 11;/*NÃO PERMITE DAR UPDATE COM DATAS NO FUTURO*/
 update corrida set data_fim_corr = DATE_SUB(data_inicio_corr, INTERVAL 1 SECOND) where id_corrida = 11;/*NÃO PERMITE DAR UPDATE COM DATAS MENORES DO QUE INICIAL*/
-update corrida set data_fim_corr = null where id_corrida = 1;/*NÃO PERMITE MUDAR DATAS VALIDAS PARA NULL*/
+update corrida set data_fim_corr = null where id_corrida = 4;/*NÃO PERMITE MUDAR DATAS VALIDAS PARA NULL*/
