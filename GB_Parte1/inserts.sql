@@ -112,5 +112,5 @@ insert into corrida (avaliacao_condutor
 values (null,null,"2019-10-20 12:30:01",  null,                 "sapiranga",       "sapiranga",          0.7, 1.7, 5, "01234567890");/*Não permite o condutor iniciar uma viagem antes de terminar a atual*/
 update corrida set data_fim_corr =  DATE_ADD(now(), INTERVAL 1 SECOND) where id_corrida = 11;/*NÃO PERMITE DAR UPDATE COM DATAS NO FUTURO*/
 update corrida set data_inicio_corr =  DATE_ADD(now(), INTERVAL 1 SECOND) where id_corrida = 11;/*NÃO PERMITE DAR UPDATE COM DATAS NO FUTURO*/
-update corrida set data_fim_corr = DATE_SUB(data_inicio_corr, INTERVAL 1 SECOND) where id_corrida = 11;/*NÃO PERMITE DAR UPDATE COM DATAS MENORES DO QUE INICIAL*/
+update corrida set data_fim_corr = DATE_SUB(data_inicio_corr, INTERVAL 1 SECOND) where id_corrida = 4;/*NÃO PERMITE DAR UPDATE COM DATAS MENORES DO QUE INICIAL*/
 update corrida set data_fim_corr = null where id_corrida = 4;/*NÃO PERMITE MUDAR DATAS VALIDAS PARA NULL*/

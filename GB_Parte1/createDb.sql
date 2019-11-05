@@ -89,7 +89,7 @@ CREATE TRIGGER chkDataCadCond BEFORE INSERT ON condutor
     END $$
 DELIMITER ;
 
-/*Verifica se as data da corrida é > now*/
+/*Verifica as data da corrida*/
 drop trigger if exists chkInsDataCorrida;
 DELIMITER $$
 CREATE TRIGGER chkInsDataCorrida BEFORE INSERT ON corrida
@@ -99,6 +99,9 @@ CREATE TRIGGER chkInsDataCorrida BEFORE INSERT ON corrida
         END IF; 
         IF (new.data_inicio_corr > now()) THEN
             signal sqlstate '45000' set MESSAGE_TEXT = 'Voce e vidente? (data de inicio da corrida no futuro)';
+        END IF; 
+        IF (new.data_fim_mot < new.data_inicio_mot) THEN
+            signal sqlstate '45000' set MESSAGE_TEXT = 'Ta errado isso ai? (data de fim da corrida menor que inicial)';
         END IF; 
     END $$
 DELIMITER ;
@@ -115,6 +118,17 @@ CREATE TRIGGER chkInsMotorista BEFORE INSERT ON motorista
         IF((SELECT id_motorista from motorista where cpf_motorista = new.cpf_motorista AND data_fim_mot is null) is not null) THEN
             signal sqlstate '45000' set MESSAGE_TEXT = 'Voce nao pode estar em dois carros ao mesmo tempo!';
         END IF;
+        /*não permite data de fim menor que data de inicio*/
+        IF (new.data_fim_mot < new.data_inicio_mot) THEN
+            signal sqlstate '45000' set MESSAGE_TEXT = 'Ta errado isso ai? (data de fim do motorista menor que inicial)';
+        END IF; 
+        /*verifica se as datas estão no futuro*/
+        IF (new.data_fim_mot > now()) THEN
+            signal sqlstate '45000' set MESSAGE_TEXT = 'Voce e vidente? (data de fim do motorista no futuro)';
+        END IF; 
+        IF (new.data_inicio_mot > now()) THEN
+            signal sqlstate '45000' set MESSAGE_TEXT = 'Voce e vidente? (data de inicio do motorista no futuro)';
+        END IF; 
     END $$
 DELIMITER ;
 
@@ -170,31 +184,11 @@ CREATE TRIGGER chkUpdDataMotorista BEFORE UPDATE ON motorista
         IF (new.data_fim_mot is null and old.data_fim_mot is not null) THEN
             signal sqlstate '45000' set MESSAGE_TEXT = 'Hmmmmm alguem esta querendo burlar as regras do jogo? (nao e permitido alterar dados do historico para null)';
         END IF;
-    END $$
-DELIMITER ;
-
-/*Verifica se data de termino é maior que inicial no update */
-drop trigger if exists chkUpdDiffMotorista;
-DELIMITER $$
-CREATE TRIGGER chkUpdDiffMotorista BEFORE UPDATE ON motorista
-    FOR EACH ROW BEGIN 
-        IF (new.data_fim_mot < new.data_inicio_mot) THEN
+        IF (new.data_fim_mot < new.data_inicio_mot OR new.data_fim_mot < old.data_inicio_mot) THEN
             signal sqlstate '45000' set MESSAGE_TEXT = 'Ta errado isso ai? (data de fim do motorista menor que inicial)';
         END IF; 
     END $$
 DELIMITER ;
-
-/*Verifica se data de termino é maior que inicial no insert */
-drop trigger if exists chkDiffMotorista;
-DELIMITER $$
-CREATE TRIGGER chkDiffMotorista BEFORE INSERT ON motorista
-    FOR EACH ROW BEGIN 
-        IF (new.data_fim_mot < new.data_inicio_mot) THEN
-            signal sqlstate '45000' set MESSAGE_TEXT = 'Ta errado isso ai? (data de fim do motorista menor que inicial)';
-        END IF; 
-    END $$
-DELIMITER ;
-
 
 /*Verifica se a data de fim da corrida é > now*/
 drop trigger if exists chkUpdDataIniCorrida;
@@ -210,6 +204,9 @@ CREATE TRIGGER chkUpdDataCorrida BEFORE UPDATE ON corrida
         IF (new.data_fim_corr is null and old.data_fim_corr is not null) THEN
             signal sqlstate '45000' set MESSAGE_TEXT = 'Hmmmmm alguem esta querendo burlar as regras do jogo? (nao e permitido alterar dados do historico para null)';
         END IF;
+        IF (new.data_fim_corr < new.data_inicio_corr OR new.data_fim_corr < old.data_inicio_corr) THEN
+            signal sqlstate '45000' set MESSAGE_TEXT = 'Ta errado isso ai? (data de fim do corrida menor que inicial)';
+        END IF; 
     END $$
 DELIMITER ;
 
