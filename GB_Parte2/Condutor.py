@@ -10,16 +10,19 @@ class Condutor:
         self.cursor = self.db.cursor()
 
     def cadastrarCondutor(self):
-        cpf = "9898778765"#input("Digite o CPF: ")
-        nome = "osdan"#input("Digite o nome do condutor: ")
-        telefone = "987676765"#input("Digite o telefone: ")
-        data = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        query = ("insert into condutor(cpf_motorista, nome_cond, telefone_cond, data_cadastro_cond) values(\"9898778765\",\"osdan\",\"987676765\",now())")#%(cpf, nome, telefone, data))
+        cpf = input("Digite o CPF: ")
+        nome = input("Digite o nome do condutor: ")
+        telefone = input("Digite o telefone: ")
+        query = ("insert into condutor(cpf_motorista, nome_cond, telefone_cond, data_cadastro_cond) values(\"%s\",\"%s\",\"%s\",now())"%(cpf, nome, telefone) )
         self.execute(query)
 
     def execute(self,query):
-        self.cursor.execute(query)
-        self.db.commit()
+        try:
+            self.cursor.execute(query)
+            self.db.commit()
+        except (mysql.Error) as e:
+            print(e)
+        return None
     
     def exit(self):
         self.db.close()
