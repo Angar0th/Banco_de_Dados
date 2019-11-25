@@ -1,8 +1,7 @@
 # -*- coding: UTF-8 -*-
 from Condutor import Condutor
 # import Corrida
-# import Motorista
-# import Passageiros
+#import Passageiros import Passageiro
 # import ResumoCondutor
 # import ResumoCorrida
 
@@ -40,7 +39,7 @@ condutorMenu.append('1- Cadastrar Condutor')
 condutorMenu.append('2- Reservar Carro')
 condutorMenu.append('3- Entregar Carro')
 condutorMenu.append('4- Consultar corridas')
-condutorMenu.append('5- Consultar saldo')
+condutorMenu.append('5- Resumo do Perfil')
 condutorMenu.append('0- Voltar')
 
 passageiroMenu = []
@@ -55,31 +54,36 @@ while(mode != 0):
     mode = askOption(modes)
     if mode == 1:#iniciado como condutor
         option = 1
+        objCondutor = Condutor()
         while(option):
             option = askOption(condutorMenu)
             if option == 1:#cadastrar condutor
-                objCondutor = Condutor()
                 objCondutor.cadastrarCondutor()
             elif option == 2:#reservar carro
-                pass
+                objCondutor.reservarCarro()
             elif option == 3:#entregar carro
-                pass
+                objCondutor.entregarCarro()
             elif option == 4:#consultar corridas
-                pass
+                objCondutor.consultarCorridas()
             elif option == 5:#consultar saldo
                 pass
+            else:
+                del objCondutor
 
     elif mode == 2:#inciado como passageiro
         option = askOption(passageiroMenu)
-        if option == 1:# Cadastrar Passageiro
-            objCondutor = Passageiros()
-            objCondutor.cadastrarCondutor()
-        elif option == 2:#Iniciar corrida
-            pass
-        elif option == 3:#Consultar corridas
-            pass
-        elif option == 4:#Encerrar corrida
-            pass
+        objPassageiro = Passageiros()
+        while(option):
+            if option == 1:# Cadastrar Passageiro
+                objPassageiro.cadastrarCondutor()
+            elif option == 2:#Iniciar corrida
+                pass
+            elif option == 3:#Consultar corridas
+                pass
+            elif option == 4:#Encerrar corrida
+                pass
+            else:
+                del objPassageiro
 
 print("Tchau!")
 
