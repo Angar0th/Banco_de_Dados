@@ -1,10 +1,10 @@
 # -*- coding: UTF-8 -*-
 from Condutor import Condutor
-# import Corrida
+from Corrida import Corrida
 # import Motorista
-# import Passageiros
+from Passageiros import Passageiro
 # import ResumoCondutor
-# import ResumoCorrida
+from ResumoCorrida import resumoCorrida
 
 
 def printOptions(options):
@@ -72,14 +72,17 @@ while(mode != 0):
     elif mode == 2:#inciado como passageiro
         option = askOption(passageiroMenu)
         if option == 1:# Cadastrar Passageiro
-            objCondutor = Passageiros()
-            objCondutor.cadastrarCondutor()
+            objPassageiro = Passageiro()
+            objPassageiro.cadastrarPassageiro()            
         elif option == 2:#Iniciar corrida
-            pass
+            objCorrida = Corrida()
+            objCorrida.realizarCorrida()
         elif option == 3:#Consultar corridas
-            pass
+            objResumoCorrida = resumoCorrida()
+            objResumoCorrida.verCorridas()
         elif option == 4:#Encerrar corrida
-            pass
+            objCorrida = Corrida()
+            objCorrida.encerrarCorrida()
 
 print("Tchau!")
 
