@@ -6,7 +6,8 @@ values ("12345678901", "Martin Scorcese", "123456789", now()),
        ("12345678904", "Niki Lauda",      "999999993", now()),
        ("12345678905", "James Hunt",      "999999994", now()),
        ("12345678906", "Frank Martin",    "999999995", now()),
-       ("12345678908", "Nathanne",        "999999998", now());
+       ("12345678908", "Nathanne",        "999999998", now()),
+       ("12345678909", "Marty McFly",     "999999999", now());
 /*INSERTS invalidos para condutor (teste)*/
 insert into condutor
 values ("12345678907", "Marty McFly",   "999999996", "2020-10-11 12:30:01");/*NÃO PERMITE VIAJANTES DO TEMPO SE CADASTRAREM (data de cadastro > now())*/
@@ -45,7 +46,8 @@ values ("012345678", "abc0f12", "Tesla Motors", "Roadster"       , 2015),
        ("012345692", "abe0026", "Fiat",         "Fiorino"        , 2001),
        ("012345693", "abe0146", "Chevrolet",    "Corsa"          , 1998),
        ("012345694", "abe0147", "Chevrolet",    "Prisma"         , 2012),
-       ("012345695", "abe0148", "Chevrolet",    "Camaro"         , 2012);
+       ("012345695", "abe0148", "Chevrolet",    "Camaro"         , 2012),
+       ("026101985", "outtime", "DMC",    "Delorean"         , 1985);
 
 
 /*INSERTS validos para motorista*/
@@ -55,6 +57,7 @@ values (now(), now(), "012345678", "12345678901"),
        (now(), now(), "012345680", "12345678903"),
        (now(), now(), "012345681", "12345678904"),
        (now(), now(), "012345682", "12345678905"),
+       (now(), now(), "026101985", "12345678909"),
        (now(), null,  "012345682", "12345678906");
 /*INSERTS e UPDATES invalidos para motorista*/
 insert into motorista (data_inicio_mot, data_fim_mot,renavam,cpf_motorista) values (now(), null, "012345682", "12345678908");/*NÃO PERMITE RETIRAR UM VEICULO QUE JÁ ESTÁ RETIRADO*/
@@ -85,6 +88,7 @@ values  (5,5,      "2019-10-11 12:30:01", "2019-10-11 12:29:31", "sapiranga",   
         (4,5,      "2019-10-18 12:30:01", "2019-10-18 12:41:31", "sapucaia do sul", "são leopoldo",       0.3, 0.5, 3, "01234567891"),
         (1,4,      "2019-10-19 12:30:01", "2019-10-19 12:41:31", "sapiranga",       "sapiranga",          0.5, 0.6, 4, "01234567892"),
         (1,4,      "2019-10-20 12:30:01", "2019-10-20 12:41:31", "sapiranga",       "sapiranga",          0.7, 1.7, 5, "01234567892"),
+        (5,5,      "1985-10-26 01:24:00", "2015-10-26 01:24:00", "1985",       "2015",          0.7, 1.7, 6, "01234567892"),
         (null,null,"2019-10-20 12:30:01",  null,                 "sapiranga",       "sapiranga",          0.7, 1.7, 5, "01234567892"),
         (null,null,"2019-10-20 12:30:01",  null,                 "sapiranga",       "sapiranga",          0.7, 1.7, 1, "01234567891");
 /*INSERTS invalidos para corrida*/

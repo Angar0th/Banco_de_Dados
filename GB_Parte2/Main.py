@@ -1,10 +1,6 @@
 # -*- coding: UTF-8 -*-
 from Condutor import Condutor
-# import Corrida
-#import Passageiros import Passageiro
-# import ResumoCondutor
-# import ResumoCorrida
-
+from Passageiros import Passageiro
 
 def printOptions(options):
     while 1:
@@ -55,34 +51,61 @@ while(mode != 0):
     if mode == 1:#iniciado como condutor
         option = 1
         objCondutor = Condutor()
+
         while(option):
-            option = askOption(condutorMenu)
+            option = askOption(condutorMenu)#pede options
+
             if option == 1:#cadastrar condutor
                 objCondutor.cadastrarCondutor()
+
             elif option == 2:#reservar carro
-                objCondutor.reservarCarro()
+                optsCarros = []
+                optsCarros.append('1- Ver Carros')
+                optsCarros.append('2- Digitar Renavam')
+                optCarro = 1
+
+                while(optCarro != 0):
+                    option = askOption(optsCarros)#pede options
+                    if(optCarro == 1):
+                        objCondutor.verCarros()
+                    else:
+                        objCondutor.reservarCarro()
+                        optCarro = 0 # força a sair
+
             elif option == 3:#entregar carro
                 objCondutor.entregarCarro()
+
             elif option == 4:#consultar corridas
                 objCondutor.consultarCorridas()
+
             elif option == 5:#consultar saldo
-                pass
+                objCondutor.consultarPerfil()
+
             else:
+                objCondutor.exit()
                 del objCondutor
 
     elif mode == 2:#inciado como passageiro
-        option = askOption(passageiroMenu)
-        objPassageiro = Passageiros()
+        option = 1
+        objPassageiro = Passageiro()
+
         while(option):
+            option = askOption(passageiroMenu)#pergunta options
+
             if option == 1:# Cadastrar Passageiro
-                objPassageiro.cadastrarCondutor()
+                objPassageiro.cadastrarPassageiro()  
+
             elif option == 2:#Iniciar corrida
-                pass
+                objPassageiro.realizarCorrida()
+
             elif option == 3:#Consultar corridas
-                pass
+                objPassageiro.verCorridas()
+
             elif option == 4:#Encerrar corrida
-                pass
+                objPassageiro.encerrarCorrida()
+
             else:
+                objPassageiro.exit()
                 del objPassageiro
 
 print("Tchau!")

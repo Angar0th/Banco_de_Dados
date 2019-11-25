@@ -1,11 +1,9 @@
 # -*- coding: UTF-8 -*-
 import mysql.connector as mysql
 
-class ResumoCondutor():   
+class ResumoVeiculos():   
     #faz o select na tabela tabela de acordo com parametro blnMotorista
     #se for true faz o select pelo motorista, se for false faz pelo passageiro
-    def consultarPerfil():
-        cpf = input("Digite o CPF: ").strip()
-        query = ("select * from ResumoCondutor"
-            " where cpf_motorista = \"%s\" "%(cpf))
+    def verCarros():
+        query = ("select * from ResumoVeiculo")
         return query
