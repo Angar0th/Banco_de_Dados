@@ -28,11 +28,17 @@ class Condutor:
     
     def reservarCarro(self):
        query = Motorista.reservarCarro()
-       self.execute(query)
+       if self.execute(query):
+            print('Carro Reservado com sucesso!')
+       else:
+            print('Erro, confira as informações digitadas!')           
     
     def entregarCarro(self):
-        Motorista.entregarCarro()
-        self.execute(query)
+        query = Motorista.entregarCarro()
+        if self.execute(query):
+            print('Carro entregue com sucesso!')
+        else:
+            print('Erro, confira as informações digitadas!')
 
     def consultarCorridas(self):
         query = ResumoCorrida.consultarCorridas(True)
@@ -56,8 +62,8 @@ class Condutor:
         results = self.select(query)
 
         if results == None or results == []:
-                print("Cpf Errado!")
-                return None
+            print("Cpf Errado!")
+            return None
 
         result = results [0]
         cpf = result[0]

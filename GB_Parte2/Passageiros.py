@@ -16,39 +16,47 @@ class Passageiro:
         cpf = input("Digite o CPF: ").strip
         nome = input("Digite o nome do passageiro: ").strip
         telefone = input("Digite o telefone: ").strip
-        query = ("insert into condutor(cpf_pass, nome_pass,"
+        query = ("insert into condutor(cpf_passageiro, nome_pass,"
             "telefone_pass, data_cadastro_pass) "
             "values(\"%s\",\"%s\",\"%s\",now())"%(cpf, nome, telefone))
-        self.execute(query)
-
+        if not self.execute(query):
+            print("Algo deu errado!")
     def verCorridas(self):
         query = ResumoCorrida.consultarCorridas(False)
-        self.select (query)
+        if not self.select (query):
+            print("Algo deu errado!")
         
     def realizarCorrida(self):
         query = Corrida.realizarCorrida()
-        self.execute(query)
+        if not self.execute(query):
+            print("Algo deu errado!")
 
     def encerrarCorrida(self):
         query = Corrida.encerrarCorrida()
-        self.execute(query)
+        if not self.execute(query):
+            print("Algo deu errado!")
 
     def realizarCorrida(self):
         query = Corrida.realizarCorrida()
-        self.execute(query)
+        if not self.execute(query):
+            print("Algo deu errado!")
 
     def execute(self,query):
         try:
             self.cursor.execute(query)
             self.db.commit()
+            tbd = self.cursor.fetchall()
+            return True
         except (mysql.Error) as e:
             print(e)
-        return None
+            return False
     
     def select(self,query):
         try:
             self.cursor.execute(query)
             tbd = self.cursor.fetchall()
+            if(tbd == [] or tbd == None):
+                return False
             for i in tbd:
                 if(i[7] != None):
                     print("Passageiro: %s, Motorista: %s, Origem: %s, Destino: %s," 
