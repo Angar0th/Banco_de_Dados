@@ -3,6 +3,7 @@ import mysql.connector as mysql
 from datetime import datetime 
 from ResumoCorrida import ResumoCorrida
 from Corrida import Corrida
+import random 
 
 class Passageiro:
     db = None
@@ -30,19 +31,21 @@ class Passageiro:
             return True   
 
     def cadastrarPassageiro(self):
-        cpf = input("Digite o CPF: ").strip
-        nome = input("Digite o nome do passageiro: ").strip
-        telefone = input("Digite o telefone: ").strip
-        query = ("insert into condutor(cpf_passageiro, nome_pass,"
+        self.cpf = input("Digite o CPF: ").strip()
+        self.nome = input("Digite o nome do passageiro: ").strip()
+        telefone = input("Digite o telefone: ").strip()
+        query = ("insert into passageiros(cpf_passageiro, nome_pass,"
             "telefone_pass, data_cadastro_pass) "
-            "values(\"%s\",\"%s\",\"%s\",now())"%(cpf, nome, telefone))
+            "values(\"%s\",\"%s\",\"%s\",now())"%(self.cpf, self.nome, telefone))
         if not self.execute(query):
             print("Algo deu errado!")
+            return False
+        return True
 
     def verCorridas(self):
-        query = ResumoCorrida.consultarCorridas(False)
+        query = ResumoCorrida.consultarCorridas(False,self.cpf)
         results = self.select (query)
-        if results == [] or results == None:
+        if results == []:
             print("Algo deu errado!")
             return None
 
@@ -53,27 +56,35 @@ class Passageiro:
                         " Nota ao veículo: %d , Nota ao Condutor: %d"
                         %(i[3],i[1],i[4],i[5],i[6],i[7],
                         str(i[8]),i[9],i[11],i[12]))
-        
-    def realizarCorrida(self):
-        query = Corrida.realizarCorrida()
-        if not self.execute(query):
-            print("Algo deu errado!")
 
     def encerrarCorrida(self):
-        query = Corrida.encerrarCorrida()
+        query = Corrida.encerrarCorrida(self.cpf)
         if not self.execute(query):
             print("Algo deu errado!")
 
     def realizarCorrida(self):
-        query = Corrida.realizarCorrida()
+        results = self.select("select id_motorista from motorista where data_fim_mot is NULL")
+        for i in results:
+            retorno = self.select("select id_motorista from corrida where data_fim_corr is NULL and id_motorista = %s" %i)
+            if(retorno != []):
+                results.remove(i)
+        
+        if(results == []):
+            print("Não há motoristas disponiveis")
+            return
+
+        id_motorista = results[random.randint(0, len(results)-1)][0]
+        query = Corrida.realizarCorrida(self.cpf,id_motorista)
         if not self.execute(query):
             print("Algo deu errado!")
+            return
+        
+        print("Corrida Iniciado!")
 
     def execute(self,query):
         try:
             self.cursor.execute(query)
             self.db.commit()
-            tbd = self.cursor.fetchall()
             return True
         except (mysql.Error) as e:
             print(e)

@@ -25,8 +25,8 @@ class Condutor:
         query = ("select * from Condutor"
             " where nome_cond = \"%s\" and cpf_motorista = \"%s\"" %(self.nome,self.cpf))
         results = self.select(query)
-        if results == [] or results == None:
-            print("Usuario ou senha errado!")
+        if results == []:
+            print("Usuario ou cpf errado!")
             return False
         else:
             print("Bem vind(x) " + self.nome)
@@ -34,37 +34,39 @@ class Condutor:
 
     def cadastrarCondutor(self):
         self.cpf = input("Digite o CPF: ")
-        nome = input("Digite o nome do condutor: ")
+        self.nome = input("Digite o nome do condutor: ")
         telefone = input("Digite o telefone: ")
         query = ("insert into condutor(cpf_motorista," 
         "nome_cond, telefone_cond, data_cadastro_cond) "
-        "values(\"%s\",\"%s\",\"%s\",now())"%(cpf, nome, telefone) )
+        "values(\"%s\",\"%s\",\"%s\",now())"%(self.cpf, self.nome, telefone) )
         if self.execute(query):
             print('Condutor Cadastrado com sucesso!')
+            return True
         else:
             print('Erro ao cadastrar, confira as informações digitadas!')
+            return False
     
     def reservarCarro(self):
-       query = Motorista.reservarCarro()
+       query = Motorista.reservarCarro(self.cpf)
        if self.execute(query):
             print('Carro Reservado com sucesso!')
        else:
             print('Erro, confira as informações digitadas!')           
     
     def entregarCarro(self):
-        query = Motorista.entregarCarro()
+        query = Motorista.entregarCarro(self.cpf)
         if self.execute(query):
             print('Carro entregue com sucesso!')
         else:
             print('Erro, confira as informações digitadas!')
 
     def consultarCorridas(self):
-        query = ResumoCorrida.consultarCorridas(True)
+        query = ResumoCorrida.consultarCorridas(True,self.cpf)
         results = self.select(query)
 
         #se algo foi digitado errado
-        if results == None or results == []:
-            print('Erro ao consultar Corridas!')
+        if results == []:
+            print('Não há corridas para mostrar!')
             return None
 
         for i in results:
@@ -76,11 +78,11 @@ class Condutor:
                     str(i[8]),i[9],i[11],i[12]))
 
     def consultarPerfil(self):
-        query = ResumoCondutor.consultarPerfil()
+        query = ResumoCondutor.consultarPerfil(self.cpf)
         results = self.select(query)
 
-        if results == None or results == []:
-            print("Cpf Errado!")
+        if results == []:
+            print("Não há Corridas realizadas ainda")
             return None
 
         result = results [0]
@@ -96,10 +98,10 @@ class Condutor:
             %(nome,cpf,qtd_aval,media_aval,qtd_corr,saldo))
 
     def verCarros(self):
-        query = ResumoVeiculos.verCarros()
+        query = ResumoVeiculos.verCarros(self.cpf)
         results = self.select(query)
 
-        if results == None or results == []:
+        if results == []:
                 print("Algo não se saiu muito bem, tente novamente mais tarde!")
                 return None
 
@@ -141,7 +143,6 @@ class Condutor:
         try:
             self.cursor.execute(query)
             self.db.commit()
-            tbd = self.cursor.fetchall()
             return True
         except (mysql.Error) as e:
             print(e)
@@ -158,4 +159,3 @@ class Condutor:
 
     def exit(self):
         self.db.close()
-        self.motorista.exit()
