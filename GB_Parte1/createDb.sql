@@ -210,20 +210,6 @@ CREATE TRIGGER chkUpdDataCorrida BEFORE UPDATE ON corrida
     END $$
 DELIMITER ;
 
-/*Verifica se o passageiro e condutor já estão numa corrida*/
-drop trigger if exists chkUpdFinalCorrida;
-DELIMITER $$
-CREATE TRIGGER chkUpdFinalCorrida BEFORE UPDATE ON corrida
-    FOR EACH ROW BEGIN /*checa um campo que nunca vai ser nulo caso ache retorne um item nas condicoes abaixo*/        
-        IF ((SELECT id_corrida from corrida where cpf_passageiro = new.cpf_passageiro AND data_fim_corr is null) is not null) THEN
-            signal sqlstate '45000' set MESSAGE_TEXT = 'Ta viajando cara?! (Passageiro tentando realizar uma corrida antes de terminar a atual)';
-        END IF; 
-        IF ((SELECT id_corrida from corrida where id_motorista = new.id_motorista AND data_fim_corr is null) is not null) THEN
-            signal sqlstate '45000' set MESSAGE_TEXT = 'Nao tente ser tao eficiente! (Condutor tentando realizar uma corrida antes de terminar a atual)';
-        END IF;
-    END $$
-DELIMITER ;
-
 /*------------VIEWS-------------*/
 drop view if exists ResumoCorrida;
 create view ResumoCorrida (

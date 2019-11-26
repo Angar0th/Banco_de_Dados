@@ -5,12 +5,29 @@ from ResumoCorrida import ResumoCorrida
 from Corrida import Corrida
 
 class Passageiro:
+    db = None
+    cursor = None
+    cpf = None
+    nome = None
     def __init__(self):
         self.db = mysql.connect(user = 'root', 
                         password = 'Lukada852@', 
                         host = '127.0.0.1',
                         database = 'meleva')
         self.cursor = self.db.cursor()
+
+    def logar(self):
+        self.cpf = input("Digite o CPF: ").strip()
+        self.nome = input ('Digite seu nome: ').strip()
+        query = ("select * from Passageiros"
+            " where nome_pass = \"%s\" and cpf_passageiro = \"%s\"" %(self.nome,self.cpf))
+        results = self.select(query)
+        if results == [] or results == None:
+            print("Usuario ou senha errado!")
+            return False
+        else:
+            print("Bem vind(x) " + self.nome)
+            return True   
 
     def cadastrarPassageiro(self):
         cpf = input("Digite o CPF: ").strip
@@ -21,10 +38,21 @@ class Passageiro:
             "values(\"%s\",\"%s\",\"%s\",now())"%(cpf, nome, telefone))
         if not self.execute(query):
             print("Algo deu errado!")
+
     def verCorridas(self):
         query = ResumoCorrida.consultarCorridas(False)
-        if not self.select (query):
+        results = self.select (query)
+        if results == [] or results == None:
             print("Algo deu errado!")
+            return None
+
+        for i in results:
+                if(i[7] != None):
+                    print("Passageiro: %s, Motorista: %s, Origem: %s, Destino: %s," 
+                        " Distância (km): %f, Valor(R$): %f, Inicio: %s, Duração: %s"
+                        " Nota ao veículo: %d , Nota ao Condutor: %d"
+                        %(i[3],i[1],i[4],i[5],i[6],i[7],
+                        str(i[8]),i[9],i[11],i[12]))
         
     def realizarCorrida(self):
         query = Corrida.realizarCorrida()
@@ -55,19 +83,10 @@ class Passageiro:
         try:
             self.cursor.execute(query)
             tbd = self.cursor.fetchall()
-            if(tbd == [] or tbd == None):
-                return False
-            for i in tbd:
-                if(i[7] != None):
-                    print("Passageiro: %s, Motorista: %s, Origem: %s, Destino: %s," 
-                        " Distância (km): %f, Valor(R$): %f, Inicio: %s, Duração: %s"
-                        " Nota ao veículo: %d , Nota ao Condutor: %d"
-                        %(i[3],i[1],i[4],i[5],i[6],i[7],
-                        str(i[8]),i[9],i[11],i[12]))
-            return True
+            return tbd
         except (mysql.Error) as e:
             print(e)
-            return False
+            return None
     
     def exit(self):
         self.db.close()

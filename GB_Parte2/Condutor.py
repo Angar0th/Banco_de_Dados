@@ -7,15 +7,33 @@ from ResumoCondutor import ResumoCondutor
 from ResumoVeiculos import ResumoVeiculos
 
 class Condutor:
+    cpf = None
+    nome = None
+    db = None
+    cursor = None
+
     def __init__(self):
         self.db = mysql.connect(user = 'root', 
                         password = 'Lukada852@', 
                         host = '127.0.0.1',
                         database = 'meleva')
         self.cursor = self.db.cursor()
+        
+    def logar(self):
+        self.cpf = input("Digite o CPF: ").strip()
+        self.nome = input ('Digite seu nome: ').strip()
+        query = ("select * from Condutor"
+            " where nome_cond = \"%s\" and cpf_motorista = \"%s\"" %(self.nome,self.cpf))
+        results = self.select(query)
+        if results == [] or results == None:
+            print("Usuario ou senha errado!")
+            return False
+        else:
+            print("Bem vind(x) " + self.nome)
+            return True   
 
     def cadastrarCondutor(self):
-        cpf = input("Digite o CPF: ")
+        self.cpf = input("Digite o CPF: ")
         nome = input("Digite o nome do condutor: ")
         telefone = input("Digite o telefone: ")
         query = ("insert into condutor(cpf_motorista," 
